@@ -405,6 +405,23 @@
           <p class="note">Gmail/Outlook open a pre-filled draft in a new tab — just hit Send. Or copy the text and send it any way you like to <strong>michael.kuiper@gmail.com</strong>.</p>
         </div>
       </form>
+      <div id="su-ok" hidden style="margin-top:14px;background:#e2f5e9;border:1px solid #1baf7a;border-radius:12px;padding:14px 18px">
+        ✅ <strong>Submitted!</strong> Your update is pending admin approval — the roster refreshes once it's approved (usually within a day). <button type="button" class="btn small" style="margin-left:8px" onclick="suReset()">Done</button>
+      </div>
+      <div id="su-addwrap" style="margin-top:12px">
+        <button type="button" class="btn small" onclick="document.getElementById('su-add').hidden=false;this.hidden=true">Not on the roster? Add yourself</button>
+        <form id="su-add" hidden style="margin-top:10px">
+          <div class="su-grid">
+            <label>Full name (as at USNA) *<br><input type="text" id="sa-name" required></label>
+            <label>Company *<br><input type="number" id="sa-company" min="1" max="30" required></label>
+            <label>RSVP<br><select id="sa-status"><option>Coming</option><option>Undecided</option><option>Not Coming</option></select></label>
+            <label>Email<br><input type="email" id="sa-email"></label>
+            <label>Phone<br><input type="tel" id="sa-phone"></label>
+            <label>State<br><input type="text" id="sa-state" maxlength="20"></label>
+          </div>
+          <button type="submit" class="btn gold" style="margin-top:12px">Submit for approval</button>
+        </form>
+      </div>
     </div>
 
     <div class="grid cols2">
@@ -811,10 +828,25 @@ function renderReps() {
   }).join('');
 }
 
-/* ============ self-service info update (via pre-filled email) ============ */
+/* ============ self-service info update ============ */
+// When the approval backend is deployed, set API_URL to its base URL
+// (e.g. 'https://usna06-roster-api.onrender.com'). Empty = email fallback only.
+const API_URL = 'https://usna06-roster-api.onrender.com';
 const SU_TO = 'michael.kuiper@gmail.com';
 const SU_CC = 'usnaclassof2006@gmail.com';
 let SU_SEL = null;
+
+async function apiSubmit(kind, name, company, changes) {
+  if (!API_URL) return false;
+  try {
+    const res = await fetch(API_URL + '/api/submit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: sessionStorage.getItem('usna06pw') || '',
+                             type: kind, name, company, changes }),
+    });
+    return (await res.json()).ok === true;
+  } catch (e) { return false; }
+}
 
 document.getElementById('su-q').addEventListener('input', () => {
   const q = document.getElementById('su-q').value.trim().toLowerCase();
@@ -847,14 +879,51 @@ function suReset() {
   SU_SEL = null;
   document.getElementById('su-form').hidden = true;
   document.getElementById('su-send').hidden = true;
+  document.getElementById('su-ok').hidden = true;
   document.getElementById('su-q').value = '';
   document.getElementById('su-matches').innerHTML = '';
 }
 
-document.getElementById('su-form').addEventListener('submit', ev => {
+document.getElementById('su-add').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const val = id => document.getElementById(id).value.trim();
+  const name = val('sa-name'), company = parseInt(val('sa-company'), 10) || null;
+  if (!name) return;
+  const changes = { rsvp: val('sa-status') };
+  if (val('sa-email')) changes.email = val('sa-email');
+  if (val('sa-phone')) changes.phone = val('sa-phone');
+  if (val('sa-state')) changes.state = val('sa-state');
+  if (await apiSubmit('new', name, company, changes)) {
+    document.getElementById('su-add').hidden = true;
+    document.getElementById('su-ok').hidden = false;
+  } else {
+    // fallback: pre-built email
+    const body = `Please add me to the reunion roster:\n\nName: ${name}\nCompany: ${company ?? '?'}\nRSVP: ${changes.rsvp}\nEmail: ${changes.email || ''}\nPhone: ${changes.phone || ''}\nState: ${changes.state || ''}`;
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${SU_TO}&su=${encodeURIComponent('Add me to the roster: ' + name)}&body=${encodeURIComponent(body)}`, '_blank')
+      || (location.href = `mailto:${SU_TO}?subject=${encodeURIComponent('Add me to the roster: ' + name)}&body=${encodeURIComponent(body)}`);
+  }
+});
+
+document.getElementById('su-form').addEventListener('submit', async ev => {
   ev.preventDefault();
   if (!SU_SEL) return;
   const val = id => document.getElementById(id).value.trim();
+  const delta = {};
+  const put = (key, oldV, newV) => { if (newV && newV !== (oldV || '')) delta[key] = newV; };
+  put('rsvp', SU_SEL.status, val('su-status'));
+  put('email', SU_SEL.email, val('su-email'));
+  put('phone', SU_SEL.phone, val('su-phone'));
+  put('state', SU_SEL.state, val('su-state'));
+  put('married', SU_SEL.married, val('su-married'));
+  if (val('su-note')) delta.note = val('su-note');
+
+  // preferred path: submit to the approval queue
+  if (Object.keys(delta).length && await apiSubmit('update', SU_SEL.name, SU_SEL.company, delta)) {
+    document.getElementById('su-form').hidden = true;
+    document.getElementById('su-ok').hidden = false;
+    return;
+  }
+
   const changes = [];
   const add = (label, oldV, newV) => { if (newV && newV !== (oldV || '')) changes.push(`${label}: ${oldV || '(blank)'} -> ${newV}`); };
   add('RSVP', SU_SEL.status, val('su-status'));
