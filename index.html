@@ -116,6 +116,12 @@
   .controls input { flex: 1 1 220px; }
   .count-note { color: var(--muted); font-size: 13.5px; margin-bottom: 10px; }
 
+  .av, .av-ph { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; object-position: top; flex: none; }
+  .av-ph { display: inline-flex; align-items: center; justify-content: center; background: var(--navy); color: var(--gold-bright); font-weight: 700; font-size: 14px; letter-spacing: 0.5px; }
+  td .personcell { display: flex; align-items: center; gap: 10px; }
+  .rep-head { display: flex; align-items: center; gap: 12px; }
+  .rep-head .av, .rep-head .av-ph { width: 56px; height: 56px; font-size: 18px; }
+
   .rep-card h4 { color: var(--navy); font-size: 15.5px; margin-bottom: 2px; }
   .rep-card .mascot { color: var(--gold); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
   .rep-card .rep { margin-top: 8px; font-size: 14px; }
@@ -431,7 +437,9 @@
 <script>
 /* ====================== crypto gate ====================== */
 const ENC_URL = 'data.enc.json';
+const PHOTOS_URL = 'photos.enc.json';
 let DATA = null;
+let PHOTOS = {};   // photoId -> object URL, populated in background after unlock
 
 async function deriveKey(password, salt, iter) {
   const enc = new TextEncoder();
@@ -442,12 +450,28 @@ async function deriveKey(password, salt, iter) {
 }
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 
-async function tryUnlock(password) {
-  const res = await fetch(ENC_URL, { cache: 'no-store' });
+async function decryptBlob(url, password) {
+  const res = await fetch(url, { cache: 'no-store' });
   const blob = await res.json();
   const key = await deriveKey(password, b64(blob.salt), blob.iter);
   const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(blob.iv) }, key, b64(blob.ct));
   return JSON.parse(new TextDecoder().decode(pt));
+}
+
+async function tryUnlock(password) {
+  return decryptBlob(ENC_URL, password);
+}
+
+async function loadPhotos(password) {
+  try {
+    const raw = await decryptBlob(PHOTOS_URL, password);
+    for (const [id, b] of Object.entries(raw)) {
+      const bytes = Uint8Array.from(atob(b), c => c.charCodeAt(0));
+      PHOTOS[id] = URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
+    }
+    renderRoster();
+    renderReps();
+  } catch (e) { /* photos are optional — site works without them */ }
 }
 
 document.getElementById('lockform').addEventListener('submit', async e => {
@@ -460,6 +484,7 @@ document.getElementById('lockform').addEventListener('submit', async e => {
     DATA = await tryUnlock(pw);
     sessionStorage.setItem('usna06pw', pw);
     boot();
+    loadPhotos(pw);
   } catch (ex) {
     err.textContent = 'Incorrect password — try again.';
   }
@@ -474,7 +499,7 @@ function lockSite() {
 (async () => {
   const saved = sessionStorage.getItem('usna06pw');
   if (saved) {
-    try { DATA = await tryUnlock(saved); boot(); } catch (e) { sessionStorage.removeItem('usna06pw'); }
+    try { DATA = await tryUnlock(saved); boot(); loadPhotos(saved); } catch (e) { sessionStorage.removeItem('usna06pw'); }
   }
 })();
 
@@ -527,6 +552,14 @@ function renderStats() {
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+function avatar(photoId, name) {
+  const url = photoId !== undefined && PHOTOS[photoId];
+  if (url) return `<img class="av" src="${url}" alt="" loading="lazy">`;
+  const initials = name.split(/\s+/).filter(Boolean);
+  const ii = (initials[0]?.[0] || '') + (initials[initials.length - 1]?.[0] || '');
+  return `<span class="av-ph">${esc(ii.toUpperCase())}</span>`;
+}
+
 function pillFor(s) {
   if (s === 'Registered & Paid') return '<span class="pill paid">Registered &amp; Paid</span>';
   if (s === 'Registered') return '<span class="pill reg">Registered</span>';
@@ -556,7 +589,7 @@ function renderRoster() {
   document.getElementById('rostercount').textContent =
     `${rows.length} classmate${rows.length === 1 ? '' : 's'} shown (of ${DATA.roster.length} on the roster)`;
   document.getElementById('rosterbody').innerHTML = rows.map(e => `<tr>
-    <td><strong>${esc(e.name)}</strong>${e.married ? ` <span class="note">(now ${esc(e.married)})</span>` : ''}</td>
+    <td><div class="personcell">${avatar(e.photo, e.name)}<div><strong>${esc(e.name)}</strong>${e.married ? ` <span class="note">(now ${esc(e.married)})</span>` : ''}</div></div></td>
     <td>${e.company}</td>
     <td>${pillFor(e.statusNorm)}</td>
     <td>${esc(e.state)}</td>
@@ -575,9 +608,9 @@ function renderReps() {
     return `<div class="card rep-card">
       <h4>Company ${c}</h4>
       <div class="mascot">${esc(reps[0].mascot || '')}</div>
-      ${reps.map(r => `<div class="rep"><span class="who">${esc(r.name)}</span>
+      ${reps.map(r => `<div class="rep rep-head">${avatar(r.photo, r.name)}<div><span class="who">${esc(r.name)}</span>
         ${r.email ? `<div><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></div>` : ''}
-        ${r.phone ? `<div>${esc(r.phone)}</div>` : ''}</div>`).join('')}
+        ${r.phone ? `<div>${esc(r.phone)}</div>` : ''}</div></div>`).join('')}
     </div>`;
   }).join('');
 }
