@@ -393,6 +393,17 @@
         </div>
         <button type="submit" class="btn gold" style="margin-top:12px">📧 Send my update</button>
         <button type="button" class="btn" style="margin-top:12px" onclick="suReset()">Cancel</button>
+        <div id="su-send" hidden style="margin-top:16px">
+          <p style="font-weight:700;color:var(--navy)">Almost done — send it with whichever you use:</p>
+          <p>
+            <a class="btn gold small" id="su-gmail" target="_blank" rel="noopener">Open in Gmail</a>
+            <a class="btn small" id="su-outlook" target="_blank" rel="noopener">Outlook.com</a>
+            <a class="btn small" id="su-mailto">My mail app</a>
+            <button type="button" class="btn small" id="su-copy">📋 Copy text</button>
+          </p>
+          <textarea id="su-body" readonly rows="7" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;color:var(--muted)"></textarea>
+          <p class="note">Gmail/Outlook open a pre-filled draft in a new tab — just hit Send. Or copy the text and send it any way you like to <strong>michael.kuiper@gmail.com</strong>.</p>
+        </div>
       </form>
     </div>
 
@@ -828,12 +839,14 @@ document.getElementById('su-matches').addEventListener('click', ev => {
   document.getElementById('su-married').value = SU_SEL.married || '';
   document.getElementById('su-note').value = '';
   document.getElementById('su-status').value = '';
+  document.getElementById('su-send').hidden = true;
   document.getElementById('su-form').hidden = false;
 });
 
 function suReset() {
   SU_SEL = null;
   document.getElementById('su-form').hidden = true;
+  document.getElementById('su-send').hidden = true;
   document.getElementById('su-q').value = '';
   document.getElementById('su-matches').innerHTML = '';
 }
@@ -850,10 +863,30 @@ document.getElementById('su-form').addEventListener('submit', ev => {
   add('State', SU_SEL.state, val('su-state'));
   add('Married name', SU_SEL.married, val('su-married'));
   if (val('su-note')) changes.push('Note: ' + val('su-note'));
-  const body = changes.length
-    ? `Roster update from the reunion site:\n\nName: ${SU_SEL.name}\nCompany: ${SU_SEL.company ?? '?'}\n\n${changes.join('\n')}\n\n(Official registration/payment stays on SignUpNow — this only updates the class roster.)`
-    : `No changes entered for ${SU_SEL.name} (Company ${SU_SEL.company ?? '?'}).`;
-  location.href = `mailto:${SU_TO}?cc=${SU_CC}&subject=${encodeURIComponent(`Roster update: ${SU_SEL.name} (Co ${SU_SEL.company ?? '?'})`)}&body=${encodeURIComponent(body)}`;
+  if (!changes.length) {
+    document.getElementById('su-body').value = 'No changes entered yet — edit a field above first.';
+    document.getElementById('su-send').hidden = false;
+    return;
+  }
+  const subject = `Roster update: ${SU_SEL.name} (Co ${SU_SEL.company ?? '?'})`;
+  const body = `Roster update from the reunion site:\n\nName: ${SU_SEL.name}\nCompany: ${SU_SEL.company ?? '?'}\n\n${changes.join('\n')}\n\n(Official registration/payment stays on SignUpNow — this only updates the class roster.)`;
+  const eS = encodeURIComponent(subject), eB = encodeURIComponent(body);
+  document.getElementById('su-gmail').href =
+    `https://mail.google.com/mail/?view=cm&fs=1&to=${SU_TO}&cc=${SU_CC}&su=${eS}&body=${eB}`;
+  document.getElementById('su-outlook').href =
+    `https://outlook.live.com/mail/0/deeplink/compose?to=${SU_TO}&subject=${eS}&body=${eB}`;
+  document.getElementById('su-mailto').href = `mailto:${SU_TO}?cc=${SU_CC}&subject=${eS}&body=${eB}`;
+  document.getElementById('su-body').value = `To: ${SU_TO}\nSubject: ${subject}\n\n${body}`;
+  const send = document.getElementById('su-send');
+  send.hidden = false;
+  send.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+document.getElementById('su-copy').addEventListener('click', async () => {
+  const btn = document.getElementById('su-copy');
+  try { await navigator.clipboard.writeText(document.getElementById('su-body').value); btn.textContent = 'Copied ✓'; }
+  catch (e) { document.getElementById('su-body').select(); document.execCommand('copy'); btn.textContent = 'Copied ✓'; }
+  setTimeout(() => { btn.textContent = '📋 Copy text'; }, 2000);
 });
 
 function renderLinks() {
