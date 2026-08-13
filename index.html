@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>USNA Class of 2006 — 20th Reunion</title>
+<style>
+  :root {
+    --navy: #00205B;
+    --navy-dark: #001233;
+    --gold: #C5B358;
+    --gold-bright: #E8CF6B;
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --text: #1a2233;
+    --muted: #5b6577;
+    --line: #e2e5ea;
+    --green: #1e7d43;
+    --blue: #1e5fbf;
+    --amber: #a06a00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  a { color: var(--blue); }
+
+  /* ---------- Lock screen ---------- */
+  #lock {
+    position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, var(--navy-dark) 0%, var(--navy) 55%, #0a3a7a 100%);
+  }
+  .lock-card { text-align: center; padding: 40px 28px; max-width: 400px; width: 92%; }
+  .lock-card .anchor { font-size: 56px; }
+  .lock-card h1 { color: #fff; font-size: 26px; margin: 12px 0 4px; letter-spacing: 0.5px; }
+  .lock-card .sub { color: var(--gold-bright); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 13px; margin-bottom: 28px; }
+  .lock-card input {
+    width: 100%; padding: 13px 16px; font-size: 17px; border-radius: 10px; border: none; outline: none;
+    text-align: center; background: rgba(255,255,255,0.95);
+  }
+  .lock-card button {
+    width: 100%; margin-top: 12px; padding: 13px; font-size: 16px; font-weight: 700; border: none; border-radius: 10px;
+    background: var(--gold); color: var(--navy-dark); cursor: pointer;
+  }
+  .lock-card button:hover { background: var(--gold-bright); }
+  .lock-err { color: #ffb3b3; font-size: 14px; margin-top: 12px; min-height: 20px; }
+  .lock-hint { color: rgba(255,255,255,0.55); font-size: 12.5px; margin-top: 22px; }
+
+  /* ---------- App shell ---------- */
+  #app { display: none; }
+  header.hero {
+    background: linear-gradient(160deg, var(--navy-dark) 0%, var(--navy) 60%, #0a3a7a 100%);
+    color: #fff; padding: 34px 20px 0; text-align: center;
+  }
+  header.hero .anchor { font-size: 40px; }
+  header.hero h1 { font-size: clamp(22px, 4.5vw, 34px); margin: 6px 0 2px; }
+  header.hero .tagline { color: var(--gold-bright); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: clamp(11px, 2.5vw, 14px); }
+  header.hero .when { margin: 14px 0 4px; font-size: clamp(15px, 3vw, 19px); font-weight: 600; }
+  header.hero .when span { color: var(--gold-bright); }
+
+  #countdown { display: flex; gap: 10px; justify-content: center; margin: 18px 0 24px; flex-wrap: wrap; }
+  #countdown .unit { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); border-radius: 12px; padding: 10px 0; width: 78px; }
+  #countdown .num { font-size: 26px; font-weight: 800; color: var(--gold-bright); }
+  #countdown .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.75); }
+
+  nav { display: flex; gap: 4px; justify-content: flex-start; overflow-x: auto; padding: 0 12px; max-width: 1080px; margin: 0 auto; -webkit-overflow-scrolling: touch; }
+  nav button {
+    background: transparent; color: rgba(255,255,255,0.8); border: none; padding: 12px 14px; font-size: 14.5px; font-weight: 600;
+    cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
+  }
+  nav button.active { color: #fff; border-bottom-color: var(--gold); }
+  nav button:hover { color: #fff; }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 26px 16px 60px; }
+  section.tab { display: none; }
+  section.tab.active { display: block; animation: fadein .25s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none; } }
+
+  h2 { color: var(--navy); font-size: 24px; margin-bottom: 6px; }
+  .lede { color: var(--muted); margin-bottom: 22px; }
+  h3 { color: var(--navy); font-size: 18px; margin: 22px 0 10px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(16,24,40,0.04); }
+  .grid { display: grid; gap: 14px; }
+  .grid.cols2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  .grid.cols3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+  .stat { text-align: center; padding: 18px 10px; }
+  .stat .n { font-size: 32px; font-weight: 800; color: var(--navy); }
+  .stat .l { color: var(--muted); font-size: 13.5px; }
+
+  .btn { display: inline-block; background: var(--navy); color: #fff !important; text-decoration: none; font-weight: 700; padding: 11px 20px; border-radius: 10px; margin: 4px 6px 4px 0; font-size: 15px; }
+  .btn:hover { background: #0a3a7a; }
+  .btn.gold { background: var(--gold); color: var(--navy-dark) !important; }
+  .btn.gold:hover { background: var(--gold-bright); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th { text-align: left; color: var(--navy); border-bottom: 2px solid var(--line); padding: 9px 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.4px; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .tablewrap { overflow-x: auto; }
+
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .pill.paid { background: #e2f5e9; color: var(--green); }
+  .pill.reg { background: #e4edfb; color: var(--blue); }
+  .pill.plan { background: #fdf3dd; color: var(--amber); }
+  .pill.unsure { background: #eee; color: #666; }
+
+  .sched-day { border-left: 4px solid var(--gold); padding-left: 16px; margin-bottom: 22px; }
+  .sched-day h3 { margin-top: 0; }
+  .sched-day ul { list-style: none; }
+  .sched-day li { padding: 5px 0; border-bottom: 1px dashed var(--line); }
+  .sched-day li:last-child { border-bottom: none; }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .controls input, .controls select { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; background: #fff; }
+  .controls input { flex: 1 1 220px; }
+  .count-note { color: var(--muted); font-size: 13.5px; margin-bottom: 10px; }
+
+  .rep-card h4 { color: var(--navy); font-size: 15.5px; margin-bottom: 2px; }
+  .rep-card .mascot { color: var(--gold); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .rep-card .rep { margin-top: 8px; font-size: 14px; }
+  .rep-card .rep .who { font-weight: 600; }
+  .rep-card .rep div { color: var(--muted); font-size: 13.5px; }
+
+  .linklist li { margin: 8px 0; }
+  .note { font-size: 13px; color: var(--muted); }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px; border-top: 1px solid var(--line); }
+  footer .lockbtn { background: none; border: none; color: var(--blue); cursor: pointer; font-size: 13px; text-decoration: underline; }
+  @media (max-width: 640px) {
+    .card { padding: 16px; }
+    #countdown .unit { width: 68px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOCK SCREEN ================= -->
+<div id="lock">
+  <div class="lock-card">
+    <div class="anchor">⚓</div>
+    <h1>USNA Class of 2006</h1>
+    <div class="sub">20th Reunion &middot; Oct 22–25, 2026</div>
+    <form id="lockform">
+      <input type="password" id="pw" placeholder="Class password" autocomplete="current-password" autofocus>
+      <button type="submit">Enter</button>
+    </form>
+    <div class="lock-err" id="lockerr"></div>
+    <div class="lock-hint">Don't have the password? Ask your company rep or email usnaclassof2006@gmail.com</div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+<header class="hero">
+  <div class="anchor">⚓</div>
+  <h1>Class of 2006 &middot; 20th Reunion</h1>
+  <div class="tagline">Last Plebe Summer &middot; Don't Give Up The Ship</div>
+  <div class="when"><span>October 22–25, 2026</span> &middot; Annapolis, Maryland</div>
+  <div id="countdown">
+    <div class="unit"><div class="num" id="cd-d">–</div><div class="lbl">Days</div></div>
+    <div class="unit"><div class="num" id="cd-h">–</div><div class="lbl">Hours</div></div>
+    <div class="unit"><div class="num" id="cd-m">–</div><div class="lbl">Min</div></div>
+    <div class="unit"><div class="num" id="cd-s">–</div><div class="lbl">Sec</div></div>
+  </div>
+  <nav id="nav">
+    <button data-tab="home" class="active">Home</button>
+    <button data-tab="schedule">Schedule</button>
+    <button data-tab="hotels">Hotels &amp; Travel</button>
+    <button data-tab="going">Who's Going</button>
+    <button data-tab="reps">Company Reps</button>
+    <button data-tab="tailgate">Tailgate</button>
+    <button data-tab="update">Update Your Info</button>
+    <button data-tab="contact">Contact</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ HOME ============ -->
+  <section class="tab active" id="tab-home">
+    <h2>Welcome Back, '06</h2>
+    <p class="lede">It's been 20 years since we tossed our covers. Homecoming weekend is <strong>October 22–25, 2026</strong> in Annapolis — here's everything you need in one place.</p>
+
+    <div class="grid cols3" id="stats"></div>
+
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">Get Squared Away</h3>
+      <a class="btn gold" href="https://signupnow.events/Default.aspx?OrgId=1046&eid=1171&OrgName=USNA2006" target="_blank" rel="noopener">Register for the Reunion</a>
+      <a class="btn" href="https://www.gofevo.com/event/2006class2" target="_blank" rel="noopener">Buy Football Tickets (Fevo)</a>
+      <a class="btn" href="https://www.usnaclassof2006.com/reunion" target="_blank" rel="noopener">Official Reunion Page</a>
+      <p class="note" style="margin-top:10px">Hotel blocks close <strong>September 1, 2026</strong> — see the Hotels &amp; Travel tab.</p>
+    </div>
+
+    <div class="grid cols2">
+      <div class="card">
+        <h3 style="margin-top:0">The Weekend at a Glance</h3>
+        <ul style="list-style:none">
+          <li><strong>Thu 10/22</strong> — '06K memorial walk/run, golf tournament, memorial service, Yard time, Supe's call, homecoming parade &amp; socials</li>
+          <li><strong>Fri 10/23</strong> — Yard time, class tailgate &amp; homecoming football game (Navy vs. North Texas is Sat — see Schedule), after party</li>
+          <li><strong>Sat 10/24</strong> — King Hall brunch, tailgate at Gate '06, Navy vs. North Texas (3:30 PM kickoff)</li>
+          <li><strong>Sun 10/25</strong> — Farewells &amp; safe travels</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Class Merch for the Weekend</h3>
+        <ul class="linklist" style="list-style:none">
+          <li>🧢 <a href="https://foreverfirstie.com/collections/2006-reunion" target="_blank" rel="noopener">Forever Firstie — 2006 reunion gear</a></li>
+          <li>👚 <a href="https://shopthedropoff.com/pages/usna-class-of-2006" target="_blank" rel="noopener">The Dropoff — ladies' apparel</a></li>
+          <li>🏃 <a href="https://runtohonorgear.com/usna_run_to_honor/shop/products/all?page=1&q=2006" target="_blank" rel="noopener">Run to Honor shirts</a></li>
+          <li>🧥 <a href="https://thejacket.club/collections/class-jackets/products/2006-class-reunion-custom-blazer" target="_blank" rel="noopener">The Jacket Club — class blazer</a> <span class="note">(code <strong>2006goats</strong>)</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEDULE ============ -->
+  <section class="tab" id="tab-schedule">
+    <h2>Reunion Schedule</h2>
+    <p class="lede">October 22–25, 2026 · Annapolis, MD. Times are being finalized — check the <a href="https://www.usnaclassof2006.com/reunion" target="_blank" rel="noopener">official reunion page</a> for the latest.</p>
+
+    <div class="card">
+      <div class="sched-day">
+        <h3>Thursday, October 22</h3>
+        <ul>
+          <li>🏃 '06K memorial walk/run</li>
+          <li>⛳ Anchors Aweigh Alumni Golf Tournament</li>
+          <li>🛍️ Midstore &amp; Visitor Center access</li>
+          <li>🕯️ Joint Class of 1956 &amp; 2006 memorial service</li>
+          <li>🫡 Noon meal formation</li>
+          <li>🏛️ Yard time &amp; Hopper Hall tours</li>
+          <li>⭐ Superintendent's call</li>
+          <li>🥂 Pre-parade social (check-in / registration)</li>
+          <li>🎺 Homecoming parade</li>
+          <li>🍻 Post-parade social (check-in / registration)</li>
+          <li>🤝 Company commander &amp; sports time</li>
+        </ul>
+      </div>
+      <div class="sched-day">
+        <h3>Friday, October 23</h3>
+        <ul>
+          <li>🏛️ Yard time</li>
+          <li>🥂 Class social events (check-in / registration available)</li>
+          <li>🎉 After party</li>
+        </ul>
+      </div>
+      <div class="sched-day">
+        <h3>Saturday, October 24</h3>
+        <ul>
+          <li>🍳 King Hall brunch</li>
+          <li>🏛️ Yard time</li>
+          <li>🏈 Tailgate at Gate '06 — starts 1:30 PM (triangle lot, shared with the Class of 1956)</li>
+          <li>🏈 Navy vs. North Texas — 3:30 PM kickoff, Navy-Marine Corps Memorial Stadium</li>
+        </ul>
+      </div>
+      <div class="sched-day">
+        <h3>Sunday, October 25</h3>
+        <ul>
+          <li>👋 Farewell — safe travels, see you at the 25th!</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">Football tickets: <a href="https://www.gofevo.com/event/2006class2" target="_blank" rel="noopener">Fevo group tickets</a> or <a href="https://navysports.evenue.net" target="_blank" rel="noopener">navysports.evenue.net</a>.</p>
+  </section>
+
+  <!-- ============ HOTELS ============ -->
+  <section class="tab" id="tab-hotels">
+    <h2>Hotels &amp; Travel</h2>
+    <p class="lede">Room blocks are reserved for the class — <strong>book by September 1, 2026</strong>. Rates are per night.</p>
+
+    <div class="card tablewrap">
+      <table>
+        <thead><tr><th>Hotel</th><th>Rate</th><th>Address</th><th>Book</th></tr></thead>
+        <tbody>
+          <tr><td>Hilton Garden Inn</td><td>$229</td><td>305 Harry S. Truman Pkwy</td><td><a href="https://www.hilton.com/en/attend-my-event/bwiangi-906-682d3d31-5ce0-424c-961a-c979a9293902" target="_blank" rel="noopener">Book block</a></td></tr>
+          <tr><td>Fairfield Inn &amp; Suites</td><td>$249 + breakfast</td><td>200 Taylor Ave</td><td><a href="https://app.marriott.com/reslink?id=1766163388713&key=GRP&app=resvlink" target="_blank" rel="noopener">Book block</a></td></tr>
+          <tr><td>Residence Inn</td><td>$249 + breakfast</td><td>200 Taylor Ave</td><td><a href="https://app.marriott.com/reslink?id=1770662431862&key=GRP&app=resvlink" target="_blank" rel="noopener">Book block</a></td></tr>
+          <tr><td>The Westin</td><td>$459</td><td>100 Westgate Cir</td><td><a href="https://book.passkey.com/event/51176853/owner/2361/home" target="_blank" rel="noopener">Book block</a></td></tr>
+          <tr><td>The Graduate</td><td>$480</td><td>100 West St</td><td><a href="https://www.usnaclassof2006.com/reunion" target="_blank" rel="noopener">Via reunion page</a></td></tr>
+          <tr><td>Annapolis Waterfront</td><td>$539</td><td>80 Compromise St</td><td><a href="https://www.usnaclassof2006.com/reunion" target="_blank" rel="noopener">Via reunion page</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Lodging Questions</h3>
+      <p>Amy Piggrem — The Curated Travel Collection<br>
+      📧 <a href="mailto:apiggrem@curatedtravelcollection.com">apiggrem@curatedtravelcollection.com</a></p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Getting There</h3>
+      <p>Closest airport is <strong>BWI</strong> (~30 min). Reagan National (DCA) ~50 min, Dulles (IAD) ~1 hr 15. Downtown Annapolis parking fills fast on football Saturdays — plan to walk, rideshare, or use stadium lots.</p>
+    </div>
+  </section>
+
+  <!-- ============ WHO'S GOING ============ -->
+  <section class="tab" id="tab-going">
+    <h2>Who's Going</h2>
+    <p class="lede">Live from the class roster — search by name, filter by company or status. Spot a mistake? See the <a href="#" onclick="showTab('update');return false;">Update Your Info</a> tab.</p>
+    <div class="controls">
+      <input type="search" id="q" placeholder="Search name, state, email…">
+      <select id="fcompany"><option value="">All companies</option></select>
+      <select id="fstatus">
+        <option value="">All statuses</option>
+        <option>Registered &amp; Paid</option>
+        <option>Registered</option>
+        <option>Planning to attend</option>
+        <option>Unsure</option>
+      </select>
+    </div>
+    <div class="count-note" id="rostercount"></div>
+    <div class="card tablewrap">
+      <table>
+        <thead><tr><th>Name</th><th>Co.</th><th>Status</th><th>State</th><th>Contact</th></tr></thead>
+        <tbody id="rosterbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ COMPANY REPS ============ -->
+  <section class="tab" id="tab-reps">
+    <h2>Company Reps</h2>
+    <p class="lede">Your rep is your point of contact for reunion word-passing. Reach out if your company info needs updating.</p>
+    <div class="grid cols3" id="repgrid"></div>
+  </section>
+
+  <!-- ============ TAILGATE ============ -->
+  <section class="tab" id="tab-tailgate">
+    <h2>Tailgate — Gate '06</h2>
+    <p class="lede">The class tailgate lives at <strong>Navy-Marine Corps Memorial Stadium</strong>, 550 Taylor Ave — triangle lot, shared with the Class of 1956, by the big tent near the water tower.</p>
+
+    <div class="card tablewrap">
+      <h3 style="margin-top:0">2026 Tailgate Schedule</h3>
+      <table>
+        <thead><tr><th>Date</th><th>Opponent</th><th>Tailgate</th><th>Kickoff</th></tr></thead>
+        <tbody>
+          <tr><td>Sat, Sep 5</td><td>Towson</td><td>12:30 PM</td><td>3:30 PM</td></tr>
+          <tr><td>Sat, Oct 10</td><td>Tulsa</td><td>12:30 PM</td><td>3:30 PM</td></tr>
+          <tr><td><strong>Sat, Oct 24 — REUNION</strong></td><td><strong>North Texas</strong></td><td><strong>1:30 PM</strong></td><td><strong>3:30 PM</strong></td></tr>
+          <tr><td>Sat, Nov 7</td><td>Temple</td><td>12:30 PM</td><td>3:30 PM</td></tr>
+          <tr><td>Sat, Nov 21</td><td>Memphis</td><td>9:30 AM</td><td>12:00 PM</td></tr>
+          <tr><td>Sat, Dec 12</td><td>Army @ MetLife Stadium</td><td>3:00 PM</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid cols2">
+      <div class="card">
+        <h3 style="margin-top:0">Tickets</h3>
+        <p><a href="https://www.gofevo.com/event/2006class2" target="_blank" rel="noopener">Class group tickets via Fevo</a> for homecoming, or <a href="https://navysports.evenue.net" target="_blank" rel="noopener">navysports.evenue.net</a> / StubHub for the Army game.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Tailgate POC</h3>
+        <p>📧 <a href="mailto:aughtsixtailgates@gmail.com">aughtsixtailgates@gmail.com</a><br>
+        <span class="note">Potluck-style — sign-up links go out per game. BYOB unless noted.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ UPDATE INFO ============ -->
+  <section class="tab" id="tab-update">
+    <h2>Update Your Info</h2>
+    <p class="lede">Moved? New number? Married name? Help us keep the roster straight so you don't miss the word.</p>
+
+    <div class="grid cols2">
+      <div class="card">
+        <h3 style="margin-top:0">1. Register / update in SignUpNow</h3>
+        <p>Registration and contact updates for the reunion run through SignUpNow.</p>
+        <a class="btn gold" href="https://signupnow.events/Default.aspx?OrgId=1046&eid=1171&OrgName=USNA2006" target="_blank" rel="noopener">Open SignUpNow</a>
+        <p class="note" style="margin-top:8px">Roster admins: <a href="https://signupnow.events/admin" target="_blank" rel="noopener">signupnow.events/admin</a> — no access? Email Patty or Mike Kuiper.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">2. Get on the class email list</h3>
+        <p>Register at <a href="https://www.myusna.com" target="_blank" rel="noopener">myUSNA.com</a> to receive official class emails from the Alumni Association.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">3. Tell your company rep</h3>
+        <p>Your rep can push corrections straight to the roster — find yours on the <a href="#" onclick="showTab('reps');return false;">Company Reps</a> tab.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">4. Or just email the class</h3>
+        <p>📧 <a href="mailto:usnaclassof2006@gmail.com">usnaclassof2006@gmail.com</a></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">More class links</h3>
+      <ul class="linklist" style="list-style:none" id="extralinks"></ul>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="tab" id="tab-contact">
+    <h2>Contact &amp; Social</h2>
+    <p class="lede">Stay plugged in between now and October.</p>
+    <div class="grid cols2">
+      <div class="card">
+        <h3 style="margin-top:0">Class Contacts</h3>
+        <p>📧 Class email — <a href="mailto:usnaclassof2006@gmail.com">usnaclassof2006@gmail.com</a></p>
+        <p>🏈 Tailgates — <a href="mailto:aughtsixtailgates@gmail.com">aughtsixtailgates@gmail.com</a></p>
+        <p>🏨 Lodging — <a href="mailto:apiggrem@curatedtravelcollection.com">apiggrem@curatedtravelcollection.com</a></p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Social Media</h3>
+        <p>📸 Instagram — <a href="https://www.instagram.com/usnaclassof2006" target="_blank" rel="noopener">@usnaclassof2006</a></p>
+        <p>🐦 X / Twitter — <a href="https://twitter.com/lastplebesummer" target="_blank" rel="noopener">@lastplebesummer</a></p>
+        <p>📘 Facebook — <a href="https://www.facebook.com/groups/usnaclassof2006" target="_blank" rel="noopener">USNA Class of 2006 group</a></p>
+        <p>▶️ YouTube — <a href="https://www.youtube.com/@USNAClassof2006" target="_blank" rel="noopener">@USNAClassof2006</a></p>
+        <p>💬 WhatsApp — <a href="https://chat.whatsapp.com/IbzYfzQKHrY8HhY9lAl5WT" target="_blank" rel="noopener">Class group chat</a></p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Class Website</h3>
+        <p><a href="https://www.usnaclassof2006.com" target="_blank" rel="noopener">usnaclassof2006.com</a> — official reunion page, class project, pictures, videos, shipmate submissions, and Last Call.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Class Project</h3>
+        <p><a href="https://www.givecampus.com/campaigns/75066/donations/new?tc=93295" target="_blank" rel="noopener">Donate to the 2006 Class Project</a><br><span class="note">Make sure to pick "Class of 2006 Class Project."</span></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Built by shipmates, for shipmates. ⚓ Go Navy, Beat Army!<br>
+  <button class="lockbtn" onclick="lockSite()">Lock site</button>
+</footer>
+</div>
+
+<script>
+/* ====================== crypto gate ====================== */
+const ENC_URL = 'data.enc.json';
+let DATA = null;
+
+async function deriveKey(password, salt, iter) {
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' },
+    base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+}
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+async function tryUnlock(password) {
+  const res = await fetch(ENC_URL, { cache: 'no-store' });
+  const blob = await res.json();
+  const key = await deriveKey(password, b64(blob.salt), blob.iter);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(blob.iv) }, key, b64(blob.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+document.getElementById('lockform').addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = document.getElementById('pw').value.trim();
+  const err = document.getElementById('lockerr');
+  err.textContent = '';
+  if (!pw) return;
+  try {
+    DATA = await tryUnlock(pw);
+    sessionStorage.setItem('usna06pw', pw);
+    boot();
+  } catch (ex) {
+    err.textContent = 'Incorrect password — try again.';
+  }
+});
+
+function lockSite() {
+  sessionStorage.removeItem('usna06pw');
+  location.reload();
+}
+
+// auto-unlock if password stored this session
+(async () => {
+  const saved = sessionStorage.getItem('usna06pw');
+  if (saved) {
+    try { DATA = await tryUnlock(saved); boot(); } catch (e) { sessionStorage.removeItem('usna06pw'); }
+  }
+})();
+
+/* ====================== app ====================== */
+function boot() {
+  document.getElementById('lock').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderStats();
+  renderRoster();
+  renderReps();
+  renderLinks();
+  startCountdown();
+}
+
+function showTab(name) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('active', s.id === 'tab-' + name));
+  window.scrollTo({ top: 0 });
+}
+document.getElementById('nav').addEventListener('click', e => {
+  if (e.target.dataset.tab) showTab(e.target.dataset.tab);
+});
+
+function startCountdown() {
+  const target = new Date('2026-10-22T09:00:00-04:00').getTime();
+  const tick = () => {
+    let d = Math.max(0, target - Date.now());
+    const days = Math.floor(d / 864e5); d -= days * 864e5;
+    const hrs = Math.floor(d / 36e5); d -= hrs * 36e5;
+    const min = Math.floor(d / 6e4); d -= min * 6e4;
+    const sec = Math.floor(d / 1e3);
+    cdD.textContent = days; cdH.textContent = hrs; cdM.textContent = min; cdS.textContent = sec;
+  };
+  const cdD = document.getElementById('cd-d'), cdH = document.getElementById('cd-h'),
+        cdM = document.getElementById('cd-m'), cdS = document.getElementById('cd-s');
+  tick(); setInterval(tick, 1000);
+}
+
+function renderStats() {
+  const r = DATA.roster;
+  const paid = r.filter(e => e.statusNorm === 'Registered & Paid').length;
+  const reg = r.filter(e => e.statusNorm === 'Registered').length;
+  const plan = r.filter(e => e.statusNorm === 'Planning to attend').length;
+  document.getElementById('stats').innerHTML = [
+    [paid, 'Registered & Paid'],
+    [reg, 'Registered'],
+    [plan, 'More planning to attend'],
+  ].map(([n, l]) => `<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+}
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function pillFor(s) {
+  if (s === 'Registered & Paid') return '<span class="pill paid">Registered &amp; Paid</span>';
+  if (s === 'Registered') return '<span class="pill reg">Registered</span>';
+  if (s === 'Planning to attend') return '<span class="pill plan">Planning</span>';
+  if (s === 'Unsure') return '<span class="pill unsure">Unsure</span>';
+  return '';
+}
+
+function renderRoster() {
+  const sel = document.getElementById('fcompany');
+  if (sel.options.length === 1) {
+    [...new Set(DATA.roster.map(e => e.company))].sort((a, b) => a - b)
+      .forEach(c => sel.add(new Option('Company ' + c, c)));
+  }
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const fc = sel.value;
+  const fs = document.getElementById('fstatus').value.replace('&amp;', '&');
+  let rows = DATA.roster.filter(e => {
+    if (fc && String(e.company) !== fc) return false;
+    if (fs && e.statusNorm !== fs) return false;
+    if (q) {
+      const hay = `${e.name} ${e.married} ${e.state} ${e.email}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  document.getElementById('rostercount').textContent =
+    `${rows.length} classmate${rows.length === 1 ? '' : 's'} shown (of ${DATA.roster.length} on the roster)`;
+  document.getElementById('rosterbody').innerHTML = rows.map(e => `<tr>
+    <td><strong>${esc(e.name)}</strong>${e.married ? ` <span class="note">(now ${esc(e.married)})</span>` : ''}</td>
+    <td>${e.company}</td>
+    <td>${pillFor(e.statusNorm)}</td>
+    <td>${esc(e.state)}</td>
+    <td>${e.email ? `<a href="mailto:${esc(e.email)}">${esc(e.email)}</a><br>` : ''}${esc(e.phone)}${e.linkedin ? `<br><a href="${esc(e.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : ''}</td>
+  </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">No matches</td></tr>';
+}
+['q', 'fcompany', 'fstatus'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderRoster);
+});
+
+function renderReps() {
+  const byCo = {};
+  DATA.reps.forEach(r => (byCo[r.company] = byCo[r.company] || []).push(r));
+  document.getElementById('repgrid').innerHTML = Object.keys(byCo).sort((a, b) => a - b).map(c => {
+    const reps = byCo[c];
+    return `<div class="card rep-card">
+      <h4>Company ${c}</h4>
+      <div class="mascot">${esc(reps[0].mascot || '')}</div>
+      ${reps.map(r => `<div class="rep"><span class="who">${esc(r.name)}</span>
+        ${r.email ? `<div><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></div>` : ''}
+        ${r.phone ? `<div>${esc(r.phone)}</div>` : ''}</div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderLinks() {
+  const skip = /signupnow|myusna|website/i;
+  document.getElementById('extralinks').innerHTML = DATA.links
+    .filter(l => !skip.test(l.label + l.url))
+    .map(l => `<li>🔗 <a href="${esc(l.url.startsWith('http') ? l.url : 'https://' + l.url)}" target="_blank" rel="noopener">${esc(l.label.replace(/:$/, ''))}</a>${l.note ? ` <span class="note">— ${esc(l.note)}</span>` : ''}</li>`).join('');
+}
+</script>
+</body>
+</html>
