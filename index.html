@@ -100,10 +100,24 @@
   .tablewrap { overflow-x: auto; }
 
   .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-  .pill.paid { background: #e2f5e9; color: var(--green); }
-  .pill.reg { background: #e4edfb; color: var(--blue); }
-  .pill.plan { background: #fdf3dd; color: var(--amber); }
-  .pill.unsure { background: #eee; color: #666; }
+  /* status colors (CVD-safe set shared with the roster tool) */
+  .pill.s-paid { background: #1baf7a; color: #fff; }
+  .pill.s-reg { background: #2a78d6; color: #fff; }
+  .pill.s-coming { background: #eda100; color: #2a2200; }
+  .pill.s-undecided { background: #4a3aa7; color: #fff; }
+  .pill.s-notcoming { background: #e34948; color: #fff; }
+  .pill.s-noresponse { background: #e1e0d9; color: #5b6577; }
+
+  .cobars { margin-top: 6px; }
+  .cobar-row { display: flex; align-items: center; gap: 10px; margin: 5px 0; }
+  .cobar-row .colbl { width: 52px; text-align: right; font-size: 12.5px; color: var(--muted); flex: none; }
+  .cobar-row a.track { display: flex; height: 16px; border-radius: 8px; overflow: hidden; background: #e1e0d9; text-decoration: none; flex: none; }
+  .cobar-row .seg { height: 100%; }
+  .cobar-row .cnt { font-size: 12px; color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 10px 0 4px; font-size: 12.5px; color: var(--muted); }
+  .legend .sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  .btn.small { padding: 9px 14px; font-size: 13.5px; }
 
   .sched-day { border-left: 4px solid var(--gold); padding-left: 16px; margin-bottom: 22px; }
   .sched-day h3 { margin-top: 0; }
@@ -191,6 +205,11 @@
     <div class="grid cols3" id="stats"></div>
 
     <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">Attendance by Company</h3>
+      <div id="cobars"></div>
+    </div>
+
+    <div class="card">
       <h3 style="margin-top:0">Get Squared Away</h3>
       <a class="btn gold" href="https://signupnow.events/Default.aspx?OrgId=1046&eid=1171&OrgName=USNA2006" target="_blank" rel="noopener">Register for the Reunion</a>
       <a class="btn" href="https://www.gofevo.com/event/2006class2" target="_blank" rel="noopener">Buy Football Tickets (Fevo)</a>
@@ -311,9 +330,12 @@
         <option value="">All statuses</option>
         <option>Registered &amp; Paid</option>
         <option>Registered</option>
-        <option>Planning to attend</option>
-        <option>Unsure</option>
+        <option>Coming</option>
+        <option>Undecided</option>
+        <option>Not Coming</option>
+        <option>No Response</option>
       </select>
+      <button class="btn small" id="copyemails" type="button">Copy emails</button>
     </div>
     <div class="count-note" id="rostercount"></div>
     <div class="card tablewrap">
@@ -512,6 +534,9 @@ function boot() {
   renderReps();
   renderLinks();
   startCountdown();
+  // deep links: ?company=5&status=No+Response jumps straight to the filtered roster
+  const p = new URLSearchParams(location.search);
+  if (p.get('company') || p.get('status')) gotoRoster(p.get('company') || '', p.get('status') || '');
 }
 
 function showTab(name) {
@@ -538,16 +563,64 @@ function startCountdown() {
   tick(); setInterval(tick, 1000);
 }
 
+const STATUS_META = [
+  ['Registered & Paid', 's-paid', '#1baf7a'],
+  ['Registered', 's-reg', '#2a78d6'],
+  ['Coming', 's-coming', '#eda100'],
+  ['Undecided', 's-undecided', '#4a3aa7'],
+  ['Not Coming', 's-notcoming', '#e34948'],
+  ['No Response', 's-noresponse', '#e1e0d9'],
+];
+
 function renderStats() {
   const r = DATA.roster;
-  const paid = r.filter(e => e.statusNorm === 'Registered & Paid').length;
-  const reg = r.filter(e => e.statusNorm === 'Registered').length;
-  const plan = r.filter(e => e.statusNorm === 'Planning to attend').length;
+  const n = s => r.filter(e => e.status === s).length;
+  const paid = n('Registered & Paid'), reg = n('Registered'), coming = n('Coming');
+  const responded = r.length - n('No Response');
   document.getElementById('stats').innerHTML = [
     [paid, 'Registered & Paid'],
     [reg, 'Registered'],
-    [plan, 'More planning to attend'],
-  ].map(([n, l]) => `<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+    [coming + paid + reg, 'Attending total'],
+    [Math.round(100 * responded / r.length) + '%', 'Of the class heard from'],
+  ].map(([v, l]) => `<div class="card stat"><div class="n">${v}</div><div class="l">${l}</div></div>`).join('');
+
+  // per-company stacked bars, shared scale
+  const byCo = {};
+  r.forEach(e => {
+    if (e.company == null) return;
+    byCo[e.company] = byCo[e.company] || { total: 0, counts: {} };
+    byCo[e.company].total++;
+    byCo[e.company].counts[e.status] = (byCo[e.company].counts[e.status] || 0) + 1;
+  });
+  const cos = Object.keys(byCo).map(Number).sort((a, b) => a - b);
+  const maxTotal = Math.max(...cos.map(c => byCo[c].total));
+  const segs = STATUS_META.filter(([s]) => s !== 'No Response');
+  const rows = cos.map(c => {
+    const { total, counts } = byCo[c];
+    const attending = (counts['Registered & Paid'] || 0) + (counts['Registered'] || 0) + (counts['Coming'] || 0);
+    const width = Math.round(100 * total / maxTotal);
+    const inner = segs.map(([s, , color]) => {
+      const k = counts[s] || 0;
+      return k ? `<span class="seg" style="width:${100 * k / total}%;background:${color}" title="${s}: ${k}"></span>` : '';
+    }).join('');
+    return `<div class="cobar-row">
+      <span class="colbl">Co ${c}</span>
+      <a class="track" style="width:calc(${width}% - 120px);min-width:60px" href="#" onclick="gotoRoster(${c});return false" title="Company ${c}: ${attending} attending of ${total}">${inner}</a>
+      <span class="cnt">${attending}/${total}</span>
+    </div>`;
+  }).join('');
+  const legend = STATUS_META.map(([s, , color]) =>
+    `<span><span class="sw" style="background:${color}"></span>${s}</span>`).join('');
+  document.getElementById('cobars').innerHTML =
+    `<div class="legend">${legend}</div><div class="cobars">${rows}</div>
+     <p class="note" style="margin-top:8px">Bar length = company size (shared scale). Click a bar to see that company's roster.</p>`;
+}
+
+function gotoRoster(company, status) {
+  document.getElementById('fcompany').value = company || '';
+  document.getElementById('fstatus').value = status || '';
+  renderRoster();
+  showTab('going');
 }
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -561,43 +634,53 @@ function avatar(photoId, name) {
 }
 
 function pillFor(s) {
-  if (s === 'Registered & Paid') return '<span class="pill paid">Registered &amp; Paid</span>';
-  if (s === 'Registered') return '<span class="pill reg">Registered</span>';
-  if (s === 'Planning to attend') return '<span class="pill plan">Planning</span>';
-  if (s === 'Unsure') return '<span class="pill unsure">Unsure</span>';
-  return '';
+  const m = STATUS_META.find(x => x[0] === s);
+  return m ? `<span class="pill ${m[1]}">${esc(s)}</span>` : '';
 }
 
 function renderRoster() {
   const sel = document.getElementById('fcompany');
   if (sel.options.length === 1) {
-    [...new Set(DATA.roster.map(e => e.company))].sort((a, b) => a - b)
+    [...new Set(DATA.roster.map(e => e.company))].filter(c => c != null).sort((a, b) => a - b)
       .forEach(c => sel.add(new Option('Company ' + c, c)));
   }
   const q = document.getElementById('q').value.trim().toLowerCase();
   const fc = sel.value;
-  const fs = document.getElementById('fstatus').value.replace('&amp;', '&');
+  const fs = document.getElementById('fstatus').value;
   let rows = DATA.roster.filter(e => {
     if (fc && String(e.company) !== fc) return false;
-    if (fs && e.statusNorm !== fs) return false;
+    if (fs && e.status !== fs) return false;
     if (q) {
       const hay = `${e.name} ${e.married} ${e.state} ${e.email}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
   });
+  FILTERED = rows;
   document.getElementById('rostercount').textContent =
     `${rows.length} classmate${rows.length === 1 ? '' : 's'} shown (of ${DATA.roster.length} on the roster)`;
   document.getElementById('rosterbody').innerHTML = rows.map(e => `<tr>
     <td><div class="personcell">${avatar(e.photo, e.name)}<div><strong>${esc(e.name)}</strong>${e.married ? ` <span class="note">(now ${esc(e.married)})</span>` : ''}</div></div></td>
-    <td>${e.company}</td>
-    <td>${pillFor(e.statusNorm)}</td>
+    <td>${e.company ?? '—'}</td>
+    <td>${pillFor(e.status)}</td>
     <td>${esc(e.state)}</td>
     <td>${e.email ? `<a href="mailto:${esc(e.email)}">${esc(e.email)}</a><br>` : ''}${esc(e.phone)}${e.linkedin ? `<br><a href="${esc(e.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : ''}</td>
   </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">No matches</td></tr>';
 }
 ['q', 'fcompany', 'fstatus'].forEach(id => {
   document.getElementById(id).addEventListener('input', renderRoster);
+});
+
+let FILTERED = [];
+document.getElementById('copyemails').addEventListener('click', async () => {
+  const emails = [...new Set(FILTERED.map(e => e.email).filter(Boolean))];
+  const btn = document.getElementById('copyemails');
+  if (!emails.length) { btn.textContent = 'No emails in view'; }
+  else {
+    try { await navigator.clipboard.writeText(emails.join(', ')); btn.textContent = `Copied ${emails.length} emails ✓`; }
+    catch (e) { btn.textContent = 'Copy failed'; }
+  }
+  setTimeout(() => { btn.textContent = 'Copy emails'; }, 2500);
 });
 
 function renderReps() {
