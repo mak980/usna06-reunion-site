@@ -119,11 +119,25 @@
 
   .btn.small { padding: 9px 14px; font-size: 13.5px; }
 
+  .notice { background: #fdf3dd; border: 1px solid #eda100; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; font-size: 14.5px; }
+  #su-matches .match { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin-top: 8px; cursor: pointer; font-size: 14.5px; }
+  #su-matches .match:hover { background: var(--bg); }
+  .su-head { display: flex; align-items: center; gap: 12px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .su-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 13.5px; color: var(--muted); }
+  .su-grid input, .su-grid select { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; font-size: 14.5px; margin-top: 3px; }
+
   .sched-day { border-left: 4px solid var(--gold); padding-left: 16px; margin-bottom: 22px; }
   .sched-day h3 { margin-top: 0; }
-  .sched-day ul { list-style: none; }
-  .sched-day li { padding: 5px 0; border-bottom: 1px dashed var(--line); }
-  .sched-day li:last-child { border-bottom: none; }
+  .ev { display: flex; gap: 12px; align-items: flex-start; padding: 9px 0; border-bottom: 1px dashed var(--line); }
+  .ev:last-child { border-bottom: none; }
+  .ev .when { flex: none; width: 92px; font-weight: 700; color: var(--navy); font-size: 13.5px; padding-top: 1px; }
+  .ev .when.tba { color: var(--muted); font-weight: 600; }
+  .ev .what { flex: 1; }
+  .ev .what .loc { color: var(--muted); font-size: 13px; }
+  .ev .addcal { flex: none; display: flex; gap: 6px; }
+  .ev .addcal a, .ev .addcal button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 4px 8px; font-size: 12px; cursor: pointer; text-decoration: none; color: var(--navy); font-weight: 600; }
+  .ev .addcal a:hover, .ev .addcal button:hover { background: var(--bg); }
+  @media (max-width: 560px) { .ev { flex-wrap: wrap; } .ev .addcal { width: 100%; justify-content: flex-end; } }
 
   .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
   .controls input, .controls select { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; background: #fff; }
@@ -214,7 +228,8 @@
       <a class="btn gold" href="https://signupnow.events/Default.aspx?OrgId=1046&eid=1171&OrgName=USNA2006" target="_blank" rel="noopener">Register for the Reunion</a>
       <a class="btn" href="https://www.gofevo.com/event/2006class2" target="_blank" rel="noopener">Buy Football Tickets (Fevo)</a>
       <a class="btn" href="https://www.usnaclassof2006.com/reunion" target="_blank" rel="noopener">Official Reunion Page</a>
-      <p class="note" style="margin-top:10px">Hotel blocks close <strong>September 1, 2026</strong> — see the Hotels &amp; Travel tab.</p>
+      <p class="note" style="margin-top:10px">Hotel blocks close <strong>September 1, 2026</strong> — see the Hotels &amp; Travel tab.<br>
+      ⚠️ Official registration &amp; payment run through <strong>SignUpNow</strong> — this site is for information only.</p>
     </div>
 
     <div class="grid cols2">
@@ -242,49 +257,9 @@
   <!-- ============ SCHEDULE ============ -->
   <section class="tab" id="tab-schedule">
     <h2>Reunion Schedule</h2>
-    <p class="lede">October 22–25, 2026 · Annapolis, MD. Times are being finalized — check the <a href="https://www.usnaclassof2006.com/reunion" target="_blank" rel="noopener">official reunion page</a> for the latest.</p>
-
-    <div class="card">
-      <div class="sched-day">
-        <h3>Thursday, October 22</h3>
-        <ul>
-          <li>🏃 '06K memorial walk/run</li>
-          <li>⛳ Anchors Aweigh Alumni Golf Tournament</li>
-          <li>🛍️ Midstore &amp; Visitor Center access</li>
-          <li>🕯️ Joint Class of 1956 &amp; 2006 memorial service</li>
-          <li>🫡 Noon meal formation</li>
-          <li>🏛️ Yard time &amp; Hopper Hall tours</li>
-          <li>⭐ Superintendent's call</li>
-          <li>🥂 Pre-parade social (check-in / registration)</li>
-          <li>🎺 Homecoming parade</li>
-          <li>🍻 Post-parade social (check-in / registration)</li>
-          <li>🤝 Company commander &amp; sports time</li>
-        </ul>
-      </div>
-      <div class="sched-day">
-        <h3>Friday, October 23</h3>
-        <ul>
-          <li>🏛️ Yard time</li>
-          <li>🥂 Class social events (check-in / registration available)</li>
-          <li>🎉 After party</li>
-        </ul>
-      </div>
-      <div class="sched-day">
-        <h3>Saturday, October 24</h3>
-        <ul>
-          <li>🍳 King Hall brunch</li>
-          <li>🏛️ Yard time</li>
-          <li>🏈 Tailgate at Gate '06 — starts 1:30 PM (triangle lot, shared with the Class of 1956)</li>
-          <li>🏈 Navy vs. North Texas — 3:30 PM kickoff, Navy-Marine Corps Memorial Stadium</li>
-        </ul>
-      </div>
-      <div class="sched-day">
-        <h3>Sunday, October 25</h3>
-        <ul>
-          <li>👋 Farewell — safe travels, see you at the 25th!</li>
-        </ul>
-      </div>
-    </div>
+    <p class="lede">October 22–25, 2026 · Annapolis, MD. Exact times are still being finalized by the reunion committee — events marked <em>Time TBA</em> will firm up on the <a href="https://www.usnaclassof2006.com/reunion" target="_blank" rel="noopener">official reunion page</a>. Tap 📅 to put an event on your calendar.</p>
+    <p><button class="btn gold small" onclick="dlIcs(WEEKEND_EVENT)">📅 Add the whole weekend to my calendar</button></p>
+    <div id="schedwrap"></div>
     <p class="note">Football tickets: <a href="https://www.gofevo.com/event/2006class2" target="_blank" rel="noopener">Fevo group tickets</a> or <a href="https://navysports.evenue.net" target="_blank" rel="noopener">navysports.evenue.net</a>.</p>
   </section>
 
@@ -390,6 +365,36 @@
   <section class="tab" id="tab-update">
     <h2>Update Your Info</h2>
     <p class="lede">Moved? New number? Married name? Help us keep the roster straight so you don't miss the word.</p>
+
+    <div class="notice">⚠️ <strong>Official registration &amp; payment happen on <a href="https://signupnow.events/Default.aspx?OrgId=1046&eid=1171&OrgName=USNA2006" target="_blank" rel="noopener">SignUpNow</a>.</strong> This site is for information only — updating your info here keeps the class roster accurate, but it does not register you for the reunion.</div>
+
+    <div class="card">
+      <h3 style="margin-top:0">✏️ Update your info right here</h3>
+      <p class="note">Find yourself on the roster (use your name as it was at USNA), fix what's changed, and hit send — it opens a pre-written email to the roster keepers. Your update gets applied to the site within a day or two.</p>
+      <input type="search" id="su-q" placeholder="Start typing your name…" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px">
+      <div id="su-matches"></div>
+      <form id="su-form" hidden style="margin-top:14px">
+        <div class="su-head" id="su-who"></div>
+        <div class="su-grid">
+          <label>RSVP<br>
+            <select id="su-status">
+              <option value="">— keep current —</option>
+              <option>Coming</option>
+              <option>Undecided</option>
+              <option>Not Coming</option>
+            </select>
+            <span class="note">"Registered / Paid" comes from SignUpNow automatically.</span>
+          </label>
+          <label>Email<br><input type="email" id="su-email"></label>
+          <label>Phone<br><input type="tel" id="su-phone"></label>
+          <label>State<br><input type="text" id="su-state" maxlength="20" placeholder="e.g. MD"></label>
+          <label>Married / new last name<br><input type="text" id="su-married"></label>
+          <label>Anything else<br><input type="text" id="su-note" placeholder="LinkedIn, corrections, +1s…"></label>
+        </div>
+        <button type="submit" class="btn gold" style="margin-top:12px">📧 Send my update</button>
+        <button type="button" class="btn" style="margin-top:12px" onclick="suReset()">Cancel</button>
+      </form>
+    </div>
 
     <div class="grid cols2">
       <div class="card">
@@ -533,6 +538,7 @@ function boot() {
   renderRoster();
   renderReps();
   renderLinks();
+  renderSchedule();
   startCountdown();
   // deep links: ?company=5&status=No+Response jumps straight to the filtered roster
   const p = new URLSearchParams(location.search);
@@ -547,6 +553,102 @@ function showTab(name) {
 document.getElementById('nav').addEventListener('click', e => {
   if (e.target.dataset.tab) showTab(e.target.dataset.tab);
 });
+
+/* ============ schedule + add-to-calendar ============ */
+// Times: only confirmed ones are set; null = TBA (calendar entry becomes all-day).
+// Locations use standard Yard venues; check the official page as details firm up.
+const SCHEDULE = [
+  { day: 'Thursday, October 22', events: [
+    { e: '🏃', t: "'06K memorial walk/run", date: '2026-10-22', start: null, loc: 'USNA — details TBA' },
+    { e: '⛳', t: 'Anchors Aweigh Alumni Golf Tournament', date: '2026-10-22', start: null, loc: 'Naval Academy Golf Club' },
+    { e: '🛍️', t: 'Midstore & Visitor Center access', date: '2026-10-22', start: null, loc: 'Bancroft Hall / Armel-Leftwich Visitor Center' },
+    { e: '🕯️', t: 'Joint Class of 1956 & 2006 memorial service', date: '2026-10-22', start: null, loc: 'USNA — venue TBA' },
+    { e: '🫡', t: 'Noon meal formation', date: '2026-10-22', start: '12:00', end: '12:30', loc: 'Tecumseh Court' },
+    { e: '🏛️', t: 'Yard time & Hopper Hall tours', date: '2026-10-22', start: null, loc: 'The Yard / Hopper Hall' },
+    { e: '⭐', t: "Superintendent's call", date: '2026-10-22', start: null, loc: 'USNA — venue TBA' },
+    { e: '🥂', t: 'Pre-parade social (check-in / registration)', date: '2026-10-22', start: null, loc: 'TBA' },
+    { e: '🎺', t: 'Homecoming parade', date: '2026-10-22', start: null, loc: 'Worden Field' },
+    { e: '🍻', t: 'Post-parade social (check-in / registration)', date: '2026-10-22', start: null, loc: 'TBA' },
+    { e: '🤝', t: 'Company commander & sports time', date: '2026-10-22', start: null, loc: 'The Yard' },
+  ]},
+  { day: 'Friday, October 23', events: [
+    { e: '🏛️', t: 'Yard time', date: '2026-10-23', start: null, loc: 'The Yard' },
+    { e: '🥂', t: 'Class social events (check-in / registration available)', date: '2026-10-23', start: null, loc: 'TBA' },
+    { e: '🎉', t: 'After party', date: '2026-10-23', start: null, loc: 'TBA' },
+  ]},
+  { day: 'Saturday, October 24', events: [
+    { e: '🍳', t: 'King Hall brunch', date: '2026-10-24', start: null, loc: 'King Hall, Bancroft Hall' },
+    { e: '🏈', t: "Class tailgate at Gate '06", date: '2026-10-24', start: '13:30', end: '15:30', loc: "Triangle lot (with the Class of 1956), Navy-Marine Corps Memorial Stadium, 550 Taylor Ave" },
+    { e: '🏈', t: 'Navy vs. North Texas — kickoff', date: '2026-10-24', start: '15:30', end: '19:00', loc: 'Navy-Marine Corps Memorial Stadium, 550 Taylor Ave, Annapolis' },
+  ]},
+  { day: 'Sunday, October 25', events: [
+    { e: '👋', t: 'Farewell — safe travels, see you at the 25th!', date: '2026-10-25', start: null, loc: 'Annapolis' },
+  ]},
+];
+const SITE_URL = 'https://tinyurl.com/usna2006reunion';
+const WEEKEND_EVENT = { t: 'USNA Class of 2006 — 20th Reunion', date: '2026-10-22', endDate: '2026-10-26', start: null,
+  loc: 'Annapolis, MD', desc: 'Homecoming weekend for the Class of 2006. Full schedule: ' + SITE_URL };
+
+function fmtTime(hm) {
+  let [h, m] = hm.split(':').map(Number);
+  const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return `${h}:${String(m).padStart(2, '0')} ${ap}`;
+}
+const dstamp = d => d.replaceAll('-', '');
+function icsTimes(ev) {
+  // Reunion weekend is EDT (UTC-4): convert local start/end to UTC Z-times.
+  if (!ev.start) {
+    const endD = ev.endDate || new Date(new Date(ev.date + 'T12:00:00Z').getTime() + 864e5).toISOString().slice(0, 10);
+    return { s: dstamp(ev.date), e: dstamp(endD), allday: true };
+  }
+  const toZ = hm => {
+    const [h, m] = hm.split(':').map(Number);
+    const d = new Date(Date.UTC(2026, 9, +ev.date.slice(8), h + 4, m));
+    return d.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+  };
+  return { s: toZ(ev.start), e: toZ(ev.end || ev.start), allday: false };
+}
+function dlIcs(ev) {
+  const { s, e, allday } = icsTimes(ev);
+  const desc = (ev.desc || ('USNA Class of 2006 20th Reunion. Details: ' + SITE_URL)) + (ev.start ? '' : ' (Exact time TBA — check the site.)');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//USNA06//Reunion//EN', 'BEGIN:VEVENT',
+    'UID:' + Math.random().toString(36).slice(2) + '@usna06',
+    'DTSTAMP:20260813T000000Z',
+    allday ? `DTSTART;VALUE=DATE:${s}` : `DTSTART:${s}`,
+    allday ? `DTEND;VALUE=DATE:${e}` : `DTEND:${e}`,
+    'SUMMARY:' + ev.t.replace(/,/g, '\\,'),
+    'LOCATION:' + (ev.loc || '').replace(/,/g, '\\,'),
+    'DESCRIPTION:' + desc.replace(/,/g, '\\,'),
+    'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+  a.download = ev.t.replace(/[^\w]+/g, '-').toLowerCase() + '.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function gcalUrl(ev) {
+  const { s, e } = icsTimes(ev);
+  const dates = ev.start ? `${s}/${e}` : `${s}/${e}`;
+  const desc = (ev.desc || ('USNA Class of 2006 20th Reunion. Details: ' + SITE_URL)) + (ev.start ? '' : ' (Exact time TBA — check the site.)');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text=' + encodeURIComponent(ev.t)
+    + '&dates=' + dates
+    + '&location=' + encodeURIComponent(ev.loc || '')
+    + '&details=' + encodeURIComponent(desc);
+}
+function renderSchedule() {
+  document.getElementById('schedwrap').innerHTML = SCHEDULE.map(day => `
+    <div class="card"><div class="sched-day" style="margin-bottom:0">
+      <h3>${day.day}</h3>
+      ${day.events.map((ev, i) => `<div class="ev">
+        <span class="when ${ev.start ? '' : 'tba'}">${ev.start ? fmtTime(ev.start) : 'Time TBA'}</span>
+        <span class="what">${ev.e} <strong>${esc(ev.t)}</strong><div class="loc">📍 ${esc(ev.loc)}</div></span>
+        <span class="addcal">
+          <button type="button" title="Download .ics (Apple/Outlook)" onclick='dlIcs(SCHEDULE.flatMap(d=>d.events)[${SCHEDULE.slice(0, SCHEDULE.indexOf(day)).reduce((n, d) => n + d.events.length, 0) + i}])'>📅 .ics</button>
+          <a href="${gcalUrl(ev)}" target="_blank" rel="noopener" title="Add to Google Calendar">G Cal</a>
+        </span>
+      </div>`).join('')}
+    </div></div>`).join('');
+}
 
 function startCountdown() {
   const target = new Date('2026-10-22T09:00:00-04:00').getTime();
@@ -697,6 +799,62 @@ function renderReps() {
     </div>`;
   }).join('');
 }
+
+/* ============ self-service info update (via pre-filled email) ============ */
+const SU_TO = 'michael.kuiper@gmail.com';
+const SU_CC = 'usnaclassof2006@gmail.com';
+let SU_SEL = null;
+
+document.getElementById('su-q').addEventListener('input', () => {
+  const q = document.getElementById('su-q').value.trim().toLowerCase();
+  const box = document.getElementById('su-matches');
+  if (q.length < 2) { box.innerHTML = ''; return; }
+  const hits = DATA.roster.filter(e => (e.name + ' ' + e.married).toLowerCase().includes(q)).slice(0, 8);
+  box.innerHTML = hits.map((e, i) => `<button type="button" class="match" data-i="${DATA.roster.indexOf(e)}">
+    ${avatar(e.photo, e.name)} <span><strong>${esc(e.name)}</strong>${e.married ? ` (now ${esc(e.married)})` : ''} — Co ${e.company ?? '?'}${e.state ? ', ' + esc(e.state) : ''}</span>
+  </button>`).join('') || '<p class="note" style="margin-top:8px">No match — email us instead and we\'ll add you.</p>';
+});
+
+document.getElementById('su-matches').addEventListener('click', ev => {
+  const b = ev.target.closest('.match');
+  if (!b) return;
+  SU_SEL = DATA.roster[+b.dataset.i];
+  document.getElementById('su-matches').innerHTML = '';
+  document.getElementById('su-q').value = SU_SEL.name;
+  document.getElementById('su-who').innerHTML = `${avatar(SU_SEL.photo, SU_SEL.name)} <span>${esc(SU_SEL.name)} — Company ${SU_SEL.company ?? '?'} · current status: ${esc(SU_SEL.status)}</span>`;
+  document.getElementById('su-email').value = SU_SEL.email || '';
+  document.getElementById('su-phone').value = SU_SEL.phone || '';
+  document.getElementById('su-state').value = SU_SEL.state || '';
+  document.getElementById('su-married').value = SU_SEL.married || '';
+  document.getElementById('su-note').value = '';
+  document.getElementById('su-status').value = '';
+  document.getElementById('su-form').hidden = false;
+});
+
+function suReset() {
+  SU_SEL = null;
+  document.getElementById('su-form').hidden = true;
+  document.getElementById('su-q').value = '';
+  document.getElementById('su-matches').innerHTML = '';
+}
+
+document.getElementById('su-form').addEventListener('submit', ev => {
+  ev.preventDefault();
+  if (!SU_SEL) return;
+  const val = id => document.getElementById(id).value.trim();
+  const changes = [];
+  const add = (label, oldV, newV) => { if (newV && newV !== (oldV || '')) changes.push(`${label}: ${oldV || '(blank)'} -> ${newV}`); };
+  add('RSVP', SU_SEL.status, val('su-status'));
+  add('Email', SU_SEL.email, val('su-email'));
+  add('Phone', SU_SEL.phone, val('su-phone'));
+  add('State', SU_SEL.state, val('su-state'));
+  add('Married name', SU_SEL.married, val('su-married'));
+  if (val('su-note')) changes.push('Note: ' + val('su-note'));
+  const body = changes.length
+    ? `Roster update from the reunion site:\n\nName: ${SU_SEL.name}\nCompany: ${SU_SEL.company ?? '?'}\n\n${changes.join('\n')}\n\n(Official registration/payment stays on SignUpNow — this only updates the class roster.)`
+    : `No changes entered for ${SU_SEL.name} (Company ${SU_SEL.company ?? '?'}).`;
+  location.href = `mailto:${SU_TO}?cc=${SU_CC}&subject=${encodeURIComponent(`Roster update: ${SU_SEL.name} (Co ${SU_SEL.company ?? '?'})`)}&body=${encodeURIComponent(body)}`;
+});
 
 function renderLinks() {
   const skip = /signupnow|myusna|website/i;
