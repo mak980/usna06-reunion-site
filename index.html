@@ -118,6 +118,7 @@
   .legend .sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 
   .btn.small { padding: 9px 14px; font-size: 13.5px; }
+  .rsvp-dd { margin-top: 4px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 7px; font-size: 12.5px; color: var(--muted); background: #fff; }
 
   .notice { background: #fdf3dd; border: 1px solid #eda100; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; font-size: 14.5px; }
   #su-matches .match { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin-top: 8px; cursor: pointer; font-size: 14.5px; }
@@ -413,7 +414,7 @@
         <form id="su-add" hidden style="margin-top:10px">
           <div class="su-grid">
             <label>Full name (as at USNA) *<br><input type="text" id="sa-name" required></label>
-            <label>Company *<br><input type="number" id="sa-company" min="1" max="30" required></label>
+            <label>Company *<br><select id="sa-company" required><option value="" disabled selected>Choose…</option><option value="NAPS">NAPS</option></select></label>
             <label>RSVP<br><select id="sa-status"><option>Coming</option><option>Undecided</option><option>Not Coming</option></select></label>
             <label>Email<br><input type="email" id="sa-email"></label>
             <label>Phone<br><input type="tel" id="sa-phone"></label>
@@ -568,6 +569,9 @@ function boot() {
   renderLinks();
   renderSchedule();
   startCountdown();
+  const sac = document.getElementById('sa-company');
+  const naps = sac.querySelector('option[value="NAPS"]');
+  for (let c = 1; c <= 30; c++) sac.insertBefore(new Option('Company ' + c, c), naps);
   // deep links: ?company=5&status=No+Response jumps straight to the filtered roster
   const p = new URLSearchParams(location.search);
   if (p.get('company') || p.get('status')) gotoRoster(p.get('company') || '', p.get('status') || '');
@@ -722,7 +726,9 @@ function renderStats() {
     byCo[e.company].total++;
     byCo[e.company].counts[e.status] = (byCo[e.company].counts[e.status] || 0) + 1;
   });
-  const cos = Object.keys(byCo).map(Number).sort((a, b) => a - b);
+  const cos = Object.keys(byCo).map(k => /^\d+$/.test(k) ? Number(k) : k)
+    .sort((a, b) => (typeof a === 'number') - (typeof b === 'number') ? (typeof a === 'number' ? -1 : 1)
+                    : (typeof a === 'number' ? a - b : String(a).localeCompare(String(b))));
   const maxTotal = Math.max(...cos.map(c => byCo[c].total));
   const segs = STATUS_META.filter(([s]) => s !== 'No Response');
   const rows = cos.map(c => {
@@ -734,8 +740,8 @@ function renderStats() {
       return k ? `<span class="seg" style="width:${100 * k / total}%;background:${color}" title="${s}: ${k}"></span>` : '';
     }).join('');
     return `<div class="cobar-row">
-      <span class="colbl">Co ${c}</span>
-      <a class="track" style="width:calc(${width}% - 120px);min-width:60px" href="#" onclick="gotoRoster(${c});return false" title="Company ${c}: ${attending} attending of ${total}">${inner}</a>
+      <span class="colbl">${typeof c === 'number' ? 'Co ' + c : esc(String(c))}</span>
+      <a class="track" style="width:calc(${width}% - 120px);min-width:60px" href="#" onclick="gotoRoster('${c}');return false" title="${typeof c === 'number' ? 'Company ' + c : c}: ${attending} attending of ${total}">${inner}</a>
       <span class="cnt">${attending}/${total}</span>
     </div>`;
   }).join('');
@@ -768,11 +774,40 @@ function pillFor(s) {
   return m ? `<span class="pill ${m[1]}">${esc(s)}</span>` : '';
 }
 
+// Status cell: SignUpNow-owned statuses are locked pills; everything else is a
+// dropdown anyone can change — the change goes to the admin approval queue.
+const SELF_RSVP = ['Coming', 'Undecided', 'Not Coming'];
+function statusCell(e) {
+  if (e.status === 'Registered & Paid' || e.status === 'Registered') return pillFor(e.status);
+  const idx = DATA.roster.indexOf(e);
+  const opts = SELF_RSVP.map(s => `<option ${s === e.status ? 'selected' : ''}>${s}</option>`).join('');
+  const ph = SELF_RSVP.includes(e.status) ? '' : `<option selected disabled>${esc(e.status || 'Set RSVP…')}</option>`;
+  return `${pillFor(e.status)}<br><select class="rsvp-dd" data-i="${idx}">${ph}${opts}</select>`;
+}
+
+document.getElementById('rosterbody').addEventListener('change', async ev => {
+  const dd = ev.target.closest('.rsvp-dd');
+  if (!dd) return;
+  const e = DATA.roster[+dd.dataset.i];
+  const newStatus = dd.value;
+  dd.disabled = true;
+  const ok = await apiSubmit('update', e.name, e.company, { rsvp: newStatus, note: 'via roster dropdown' });
+  if (ok) {
+    dd.closest('td').innerHTML = `${pillFor(e.status)}<br><span class="note">⏳ ${esc(newStatus)} — pending approval</span>`;
+  } else {
+    dd.disabled = false;
+    alert('Could not reach the approval server — try again in a minute, or use the Update Your Info tab.');
+    renderRoster();
+  }
+});
+
 function renderRoster() {
   const sel = document.getElementById('fcompany');
   if (sel.options.length === 1) {
-    [...new Set(DATA.roster.map(e => e.company))].filter(c => c != null).sort((a, b) => a - b)
-      .forEach(c => sel.add(new Option('Company ' + c, c)));
+    const cos = [...new Set(DATA.roster.map(e => e.company))].filter(c => c != null && c !== 'NAPS')
+      .sort((a, b) => (typeof a === 'number' && typeof b === 'number') ? a - b : String(a).localeCompare(String(b)));
+    cos.forEach(c => sel.add(new Option(typeof c === 'number' ? 'Company ' + c : String(c), c)));
+    sel.add(new Option('NAPS', 'NAPS'));
   }
   const q = document.getElementById('q').value.trim().toLowerCase();
   const fc = sel.value;
@@ -792,7 +827,7 @@ function renderRoster() {
   document.getElementById('rosterbody').innerHTML = rows.map(e => `<tr>
     <td><div class="personcell">${avatar(e.photo, e.name)}<div><strong>${esc(e.name)}</strong>${e.married ? ` <span class="note">(now ${esc(e.married)})</span>` : ''}</div></div></td>
     <td>${e.company ?? '—'}</td>
-    <td>${pillFor(e.status)}</td>
+    <td>${statusCell(e)}</td>
     <td>${esc(e.state)}</td>
     <td>${e.email ? `<a href="mailto:${esc(e.email)}">${esc(e.email)}</a><br>` : ''}${esc(e.phone)}${e.linkedin ? `<br><a href="${esc(e.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : ''}</td>
   </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">No matches</td></tr>';
@@ -887,7 +922,8 @@ function suReset() {
 document.getElementById('su-add').addEventListener('submit', async ev => {
   ev.preventDefault();
   const val = id => document.getElementById(id).value.trim();
-  const name = val('sa-name'), company = parseInt(val('sa-company'), 10) || null;
+  const raw = val('sa-company');
+  const name = val('sa-name'), company = /^\d+$/.test(raw) ? parseInt(raw, 10) : (raw || null);
   if (!name) return;
   const changes = { rsvp: val('sa-status') };
   if (val('sa-email')) changes.email = val('sa-email');
